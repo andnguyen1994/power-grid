@@ -2,13 +2,12 @@ import React from 'react'
 
 function PlayerTableData({ players }) {
   let rows = []
-  console.log(players)
   for (var i = 0; i < players.length; i++) {
     rows.push(
       <tr>
         <td>{players[i].number + 1}</td>
         <td>{players[i].money}</td>
-        <td>{players[i].powerplants}</td>
+        {displayPowerplants(players[i].powerplants)}
         <td>{players[i].cities}</td>
       </tr>
     )
@@ -24,6 +23,14 @@ function PlayerTableData({ players }) {
       {rows}
     </table>
   )
+}
+
+function displayPowerplants(powerplants) {
+  let arr = []
+  for (let i = 0; i < powerplants.length; i++) {
+    arr.push(<tr>{powerplants[i].number},</tr>)
+  }
+  return arr
 }
 
 export default PlayerTableData

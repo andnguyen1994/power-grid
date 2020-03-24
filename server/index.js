@@ -15,13 +15,13 @@ const io = require('socket.io')(server)
 let numPlayers = 0
 let players = []
 let curAuction = {
+  active: false,
   curPlayer: -1,
-  price: 0,
+  curBid: 0,
   curCard: -1,
-  turn: -1,
   turnOrder: [0, 1, 2, 3]
 }
-let turnOrder = [0, 1, 2, 3]
+let turn
 
 let powerplantDeck = intialState.powerplantDeck
 let market = powerplantDeck.slice(0, 8)
@@ -62,7 +62,7 @@ io.on('connection', socket => {
     players = shuffle(players)
     //need to remove cards and shuffle in tier 3 card
     powerplantDeck = shuffle(powerplantDeck)
-    io.in('GAME').emit('INIT_GAME_STATE', {
+    io.in('GAME').emit('GAME_STATE_UPDATE', {
       market: market,
       players: players
     })
@@ -73,11 +73,14 @@ io.on('connection', socket => {
   socket.on('AUCTION_BID', data => {
     //verify auction bid
     console.log('received auction')
-    if (socket.id === players[curAuction.turnOrder[0]].key) {
+    console.log(parseInt(data.bid))
+    //confirm auction is ongoing
+    if (curAuction.turnOrder[0] === -1) {
+    } else if (socket.id === players[curAuction.turnOrder[0]].key) {
       console.log('correct player')
-      if (curAuction.card === '') {
-        if (data.bid <= curAuction.price) {
-          player[socket.id].auctionComp = true
+      if (curAuction.active === false) {
+        if (data.bid <= curAuction.curBid) {
+          players[curAuction.turnOrder[0]].auctionComp = true
         } else {
           let auctionQ = []
           for (var i = 0; i < players.length; i++) {
@@ -85,27 +88,56 @@ io.on('connection', socket => {
               auctionQ.push(i)
             }
           }
+          auctionQ.push(auctionQ.shift())
           curAuction = {
-            curPlayer: playerKeys.indexOf(socket.id),
-            price: market[data.card].number,
-            Card: market[data.card],
+            active: true,
+            curPlayer: players.find(e => e.key === socket.id),
+            curBid: market[data.card].number,
+            card: market[data.card],
             turnOrder: auctionQ
           }
+          market.splice(data.card, 1)
         }
-      } else if (data.bid <= curAuction.price) {
+      } else if (data.bid <= curAuction.curBid) {
+        console.log(
+          data.bid,
+          curAuction.curBid,
+          data.bid + curAuction.curBid,
+          data.bid <= curAuction.curBid
+        )
         curAuction.turnOrder.shift()
+        console.log('remove player')
       } else {
-        curAuction.price = data.bid
-        curAuction.curPlayer = curAuction.turn
+        console.log(data)
+        curAuction.curBid = data.bid
+        curAuction.curPlayer = players.find(e => e.key === socket.id)
         curAuction.turnOrder.push(curAuction.turnOrder.shift())
       }
-
+      console.log(curAuction.turnOrder)
+      console.log(curAuction.curBid)
       if (curAuction.turnOrder.length === 1) {
         players[curAuction.turnOrder[0]].auctionComp = true
         players[curAuction.turnOrder[0]].powerplants.push(curAuction.card)
-        player[curAuction.turnOrder[0]].money -= curAuction.price
+        players[curAuction.turnOrder[0]].money -= curAuction.curBid
+        curAuction.active = false
+        let next = () => {
+          for (let i = 0; i < players.length; i++) {
+            if (!players[i].auctionComp) {
+              return i
+            }
+          }
+          return -1
+        }
+        console.log(next())
+        curAuction.turnOrder = [next()]
+        console.log('turnorder', curAuction.turnOrder)
         updateMarket(market, powerplantDeck.pop())
       }
+      io.in('GAME').emit('AUCTION_UPDATE', curAuction)
+      io.in('GAME').emit('GAME_STATE_UPDATE', {
+        market: market,
+        players: players
+      })
     }
   })
   //player 1 starts by choosing a powerplant to auction, waits for next player until all passes and highest gets power plant

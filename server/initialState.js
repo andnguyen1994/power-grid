@@ -47,9 +47,22 @@ module.exports = {
       power: 4
     },
     {
-      number: 1,
+      number: 11,
       type: ['free'],
-      power: 4
+      power: 4,
+      cost: ''
+    },
+    {
+      number: 12,
+      type: ['free'],
+      power: 4,
+      cost: ''
+    },
+    {
+      number: 13,
+      type: ['free'],
+      power: 4,
+      cost: ''
     }
   ],
   test: 'hello'

@@ -5,22 +5,26 @@ function Market({ marketData, socket }) {
   let rows = []
 
   const handleAuction = index => {
+    console.log('index', index)
+    console.log('market', marketData)
     socket.emit('AUCTION_BID', { bid: marketData[index].number, card: index })
   }
-
+  console.log(marketData, rows)
   for (let i = 0; i < marketData.length; i++) {
-    rows.push(
-      <tr>
-        <td>
-          <button onClick={() => handleAuction(i)}>
-            {marketData[i].number}
-          </button>
-        </td>
-        <td>{marketData[i].type}</td>
-        <td>{marketData[i].cost}</td>
-        <td>{marketData[i].power}</td>
-      </tr>
-    )
+    if (!!marketData[i]) {
+      rows.push(
+        <tr>
+          <td>
+            <button onClick={() => handleAuction(i)}>
+              {marketData[i].number}
+            </button>
+          </td>
+          <td>{marketData[i].type}</td>
+          <td>{marketData[i].cost}</td>
+          <td>{marketData[i].power}</td>
+        </tr>
+      )
+    }
   }
 
   return (

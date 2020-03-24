@@ -3,6 +3,7 @@ import socketIOClient from 'socket.io-client'
 import styled from 'styled-components'
 import PlayerDataTable from './PlayerDataTable'
 import Market from './Market'
+import Auction from './Auction'
 
 const testCSS = styled.div``
 
@@ -12,6 +13,7 @@ function FirstComponent() {
   const [number, setNumber] = useState(-1)
   const [players, updatePlayers] = useState([])
   const [market, updateMarket] = useState([])
+  const [auction, updateAuction] = useState({ active: false })
 
   useEffect(() => {
     if (number === -1) {
@@ -26,9 +28,14 @@ function FirstComponent() {
       socket.on('PLAYER_UPDATE', data => {
         updatePlayers(data.players)
       })
-      socket.on('INIT_GAME_STATE', data => {
+      socket.on('GAME_STATE_UPDATE', data => {
         updateMarket(data.market)
         updatePlayers(data.players)
+      })
+      socket.on('AUCTION_UPDATE', data => {
+        console.log('auction update')
+        updateAuction(data)
+        console.log(data)
       })
     }
   })
@@ -36,13 +43,20 @@ function FirstComponent() {
   const handleStart = () => {
     socket.emit('START')
   }
-  console.log(number)
   return (
     <div>
       {' '}
       {number} <button onClick={() => handleStart()}>start</button>
       <PlayerDataTable players={players} />
       <Market marketData={market} socket={socket} />
+      {auction.active && (
+        <Auction
+          socket={socket}
+          curPlayer={Auction.curPalyer}
+          curBid={auction.curBid}
+          card={auction.card}
+        />
+      )}
     </div>
   )
 }
