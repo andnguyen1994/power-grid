@@ -120,6 +120,7 @@ io.on('connection', socket => {
         players[curAuction.turnOrder[0]].powerplants.push(curAuction.card)
         players[curAuction.turnOrder[0]].money -= curAuction.curBid
         curAuction.active = false
+        curAuction.curBid = 0
         let next = () => {
           for (let i = 0; i < players.length; i++) {
             if (!players[i].auctionComp) {
