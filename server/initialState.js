@@ -65,5 +65,50 @@ module.exports = {
       cost: ''
     }
   ],
-  test: 'hello'
+  resources: [
+    {
+      count: 0,
+      market: 24,
+      refill: [5, 6, 4]
+    },
+    {
+      count: 0,
+      market: 24,
+      refill: [3, 4, 5]
+    },
+    {
+      count: 18,
+      market: 6,
+      refill: [2, 3, 4]
+    },
+    {
+      count: 12,
+      market: 0,
+      refill: [1, 2, 2]
+    }
+  ],
+  payout: [
+    0,
+    10,
+    22,
+    33,
+    44,
+    54,
+    64,
+    73,
+    82,
+    90,
+    98,
+    105,
+    112,
+    118,
+    124,
+    129,
+    134,
+    138,
+    142,
+    145,
+    148,
+    150
+  ]
 }

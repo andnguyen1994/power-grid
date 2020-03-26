@@ -43,6 +43,31 @@ function FirstComponent() {
   const handleStart = () => {
     socket.emit('START')
   }
+
+  //
+
+  const handleRemove = e => {
+    e.preventDefault()
+    socket.emit('REMOVAL', { remove: e })
+  }
+
+  const remove = () => {
+    let x = players.find(p => p.number === number + 1)
+    if (x) {
+      if (x.powerplants.length > 3) {
+        return (
+          <div>
+            <button onClick={handleRemove(0)}>1</button>
+            <button onClick={handleRemove(1)}>2</button>
+            <button onClick={handleRemove(2)}>3</button>
+          </div>
+        )
+      }
+    }
+    return
+  }
+
+  console.log(auction.active)
   return (
     <div>
       {' '}
@@ -57,6 +82,7 @@ function FirstComponent() {
           card={auction.card}
         />
       )}
+      {remove}
     </div>
   )
 }
