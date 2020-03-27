@@ -63,6 +63,12 @@ module.exports = {
       type: ['free'],
       power: 4,
       cost: ''
+    },
+    {
+      number: 999,
+      type: ['free'],
+      power: 0,
+      cost: ''
     }
   ],
   resources: [
@@ -110,5 +116,25 @@ module.exports = {
     145,
     148,
     150
+  ],
+  cities: [
+    {
+      name: 'Seattle',
+      owners: [],
+      neighbors: [1, 2],
+      weights: [5, 8]
+    },
+    {
+      name: 'Los Angeles',
+      owners: [],
+      neighbors: [0],
+      weights: [5]
+    },
+    {
+      name: 'New York',
+      owners: [],
+      neighbors: [0],
+      weights: [8]
+    }
   ]
 }

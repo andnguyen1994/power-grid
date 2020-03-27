@@ -1,4 +1,8 @@
-function updateMarket(market, next) {
+function updateMarket(market, powerplantDeck) {
+  next = powerplantDeck.pop()
+  if (next.number === 999) {
+    //shuffle
+  }
   market.push(next)
   market.sort((a, b) => {
     if (a.number > b.number) {
