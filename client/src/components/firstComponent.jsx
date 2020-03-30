@@ -4,10 +4,11 @@ import styled from 'styled-components'
 import PlayerDataTable from './PlayerDataTable'
 import Market from './Market'
 import Auction from './Auction'
+import Modal from '@material-ui/core/Modal'
 
 const testCSS = styled.div``
 
-const socket = socketIOClient('http://192.168.1.82:8080')
+const socket = socketIOClient('http://localhost:8080')
 
 function FirstComponent() {
   const [number, setNumber] = useState(-1)
@@ -83,6 +84,16 @@ function FirstComponent() {
         />
       )}
       {remove}
+      <svg width="100" height="100">
+        <circle
+          cx="50"
+          cy="50"
+          r="40"
+          stroke="green"
+          stroke-width="4"
+          fill="yellow"
+        />
+      </svg>
     </div>
   )
 }

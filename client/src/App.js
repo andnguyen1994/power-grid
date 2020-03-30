@@ -1,12 +1,13 @@
 import React from 'react'
 import logo from './logo.svg'
 import './App.css'
-import FirstComponent from './components/firstComponent'
+import 'typeface-roboto'
+import GameStateContainer from './components/GameStateContainer'
 
 function App() {
   return (
     <div className="App">
-      <FirstComponent />
+      <GameStateContainer />
     </div>
   )
 }

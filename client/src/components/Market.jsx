@@ -1,42 +1,52 @@
 import React from 'react'
+import styled from 'styled-components'
 import socketIOClient from 'socket.io-client'
+import PowerplantCard from './PowerplantCard'
+import List from '@material-ui/core/List'
+import ListItem from '@material-ui/core/ListItem'
+import ListItemText from '@material-ui/core/ListItemText'
+import Divider from '@material-ui/core/Divider'
+
+const PowerplantMarketContainer = styled(List)`
+  height: 40%;
+`
+
+const CardContainer = styled.div`
+  height: ${100 / 8}%;
+`
 
 function Market({ marketData, socket }) {
-  let rows = []
-
-  const handleAuction = index => {
+  const handleAuction = (index, e) => {
     console.log('index', index)
     console.log('market', marketData)
     socket.emit('AUCTION_BID', { bid: marketData[index].number, card: index })
   }
-  console.log(marketData, rows)
-  for (let i = 0; i < marketData.length; i++) {
-    if (!!marketData[i]) {
-      rows.push(
-        <tr>
-          <td>
-            <button onClick={() => handleAuction(i)}>
-              {marketData[i].number}
-            </button>
-          </td>
-          <td>{marketData[i].type}</td>
-          <td>{marketData[i].cost}</td>
-          <td>{marketData[i].power}</td>
-        </tr>
-      )
-    }
-  }
-
+  //need to center
   return (
-    <table>
-      <tr>
-        <th>Number </th>
-        <th>Resource </th>
-        <th>cost </th>
-        <th>power</th>
-      </tr>
-      {rows}
-    </table>
+    <PowerplantMarketContainer>
+      {marketData.map((p, index) => {
+        let x = index === 4
+        return (
+          <CardContainer>
+            {x && <Divider />}
+            <ListItem
+              button
+              onClick={function(event) {
+                event.preventDefault()
+                handleAuction(index)
+              }}
+            >
+              <PowerplantCard
+                number={p.number}
+                type={p.type}
+                cost={p.cost}
+                power={p.power}
+              />
+            </ListItem>
+          </CardContainer>
+        )
+      })}
+    </PowerplantMarketContainer>
   )
 }
 
