@@ -31,7 +31,6 @@ let powerplantDeck = initialState.powerplantDeck
 let cities = initialState.cities
 let powerplantMarket = powerplantDeck.slice(0, 8)
 powerplantDeck = powerplantDeck.slice(8, powerplantDeck.length)
-
 console.log(powerplantDeck)
 // Meat of code goes in here
 io.on('connection', socket => {
@@ -71,11 +70,19 @@ io.on('connection', socket => {
       //send cities map, markets, send order
       players = shuffle(players)
       //need to remove cards and shuffle in tier 3 card
+      let temp = powerplantDeck[2]
       powerplantDeck = shuffle(powerplantDeck)
+      powerplantDeck.unshift(temp)
+      powerplantDeck.push({
+        number: 999,
+        type: [1, 1, 1, 1],
+        cost: 999,
+        power: 0
+      })
       io.in('GAME').emit('GAME_STATE_UPDATE', {
         market: powerplantMarket,
         players: players,
-        resources: resources.market,
+        resources: resources.map(r => ({ market: r.market, count: r.count })),
         cities: cities
       })
       phase = 'AUCTION'

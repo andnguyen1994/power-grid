@@ -4,7 +4,9 @@ import styled from 'styled-components'
 import PlayerDataTable from './PlayerDataTable'
 import StartButton from './StartButton'
 import Market from './Market'
+import ResourceMarket from './ResourceMarket'
 import Auction from './Auction'
+import { Coal, Oil } from './Icons'
 
 const socket = socketIOClient('http://localhost:8080')
 
@@ -39,6 +41,12 @@ const GameStateContainer = () => {
   const [number, setNumber] = useState(-1)
   const [players, updatePlayers] = useState([])
   const [market, updateMarket] = useState([])
+  const [resources, updateResources] = useState([
+    { market: 0, count: 0 },
+    { market: 0, count: 0 },
+    { market: 0, count: 0 },
+    { market: 0, count: 0 }
+  ])
   const [auction, updateAuction] = useState({ active: false })
 
   useEffect(() => {
@@ -57,6 +65,7 @@ const GameStateContainer = () => {
       socket.on('GAME_STATE_UPDATE', data => {
         updateMarket(data.market)
         updatePlayers(data.players)
+        updateResources(data.resources)
       })
       socket.on('AUCTION_UPDATE', data => {
         console.log('auction update')
@@ -76,6 +85,7 @@ const GameStateContainer = () => {
       </PlayerAreaContainer>
       <MarketAreaContainer>
         <Market marketData={market} socket={socket} />
+        <ResourceMarket resources={resources} />
       </MarketAreaContainer>
     </ContainerStyle>
   )

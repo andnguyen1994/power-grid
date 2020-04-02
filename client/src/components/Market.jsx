@@ -8,11 +8,15 @@ import ListItemText from '@material-ui/core/ListItemText'
 import Divider from '@material-ui/core/Divider'
 
 const PowerplantMarketContainer = styled(List)`
-  height: 40%;
+  height: 38%;
 `
 
 const CardContainer = styled.div`
-  height: ${100 / 8}%;
+  height: ${props => 100 / props.length}%;
+`
+
+const ListItemContainer = styled(ListItem)`
+  height: 100%;
 `
 
 function Market({ marketData, socket }) {
@@ -21,28 +25,23 @@ function Market({ marketData, socket }) {
     console.log('market', marketData)
     socket.emit('AUCTION_BID', { bid: marketData[index].number, card: index })
   }
-  //need to center
+  //need to center, add condition for phase 3
   return (
     <PowerplantMarketContainer>
-      {marketData.map((p, index) => {
-        let x = index === 4
+      {marketData.map((p, index, arr) => {
+        let x = index === parseInt(arr.length / 2)
         return (
-          <CardContainer>
+          <CardContainer length={arr.length}>
             {x && <Divider />}
-            <ListItem
+            <ListItemContainer
               button
               onClick={function(event) {
                 event.preventDefault()
                 handleAuction(index)
               }}
             >
-              <PowerplantCard
-                number={p.number}
-                type={p.type}
-                cost={p.cost}
-                power={p.power}
-              />
-            </ListItem>
+              <PowerplantCard powerplant={p} />
+            </ListItemContainer>
           </CardContainer>
         )
       })}

@@ -6,6 +6,9 @@ import TableContainer from '@material-ui/core/TableContainer'
 import TableHead from '@material-ui/core/TableHead'
 import TableRow from '@material-ui/core/TableRow'
 import Paper from '@material-ui/core/Paper'
+import List from '@material-ui/core/List'
+import ListItem from '@material-ui/core/ListItem'
+import PowerplantCard from './PowerplantCard'
 
 function PlayerTableData({ players }) {
   console.log(players)
@@ -29,7 +32,15 @@ function PlayerTableData({ players }) {
               </TableCell>
               <TableCell align="right">{p.money}</TableCell>
               <TableCell align="right">
-                {displayPowerplants(p.powerplants)}
+                <List>
+                  {p.powerplants.map(powerplant => {
+                    return (
+                      <ListItem>
+                        <PowerplantCard powerplant={powerplant} />
+                      </ListItem>
+                    )
+                  })}
+                </List>
               </TableCell>
               <TableCell align="right">{p.cities}</TableCell>
               <TableCell align="right">{p.resources}</TableCell>
