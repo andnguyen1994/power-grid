@@ -14,7 +14,7 @@ export const Oil = ({ fill }) => (
       cy={16}
       r={15}
       stroke={'#297045'}
-      stroke-width=""
+      strokeWidth=""
       fill={fill ? '#297045' : 'white'}
     />
   </svg>
@@ -31,14 +31,13 @@ export const Uranium = ({ fill }) => (
     <path
       fill={fill ? '#9A031E' : 'white'}
       stroke="#9A031E"
-      stroke-width="4"
+      strokeWidth="4"
       d="m25,1 6,17h18l-14,11 5,17-15-10-15,10 5-17-14-11h18z"
     />
   </svg>
 )
 
 export const Garbage = ({ fill }) => {
-  console.log(fill)
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -50,7 +49,7 @@ export const Garbage = ({ fill }) => {
       <polygon
         fill={fill ? '#FB8B24' : 'white'}
         stroke="#FB8B24"
-        stroke-width="4"
+        strokeWidth="4"
         points="0 51.961, 60 51.961, 30 0"
       />
     </svg>
@@ -68,7 +67,7 @@ export const Coal = ({ fill }) => (
     <polygon
       fill={fill ? '#004777' : 'white'}
       stroke="#004777"
-      stroke-width="4"
+      strokeWidth="4"
       points="0 60, 60 60, 60 0, 0 0"
     />
   </svg>

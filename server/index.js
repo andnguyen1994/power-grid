@@ -12,10 +12,8 @@ app.use(express.static('public'))
 
 const io = require('socket.io')(server)
 
-let turnCount = 0
-let phase = 'LOBBY'
+let gameState = { turn: 0, phase: 'LOBBY', step: 0 }
 let numPlayers = 0
-let step = 0
 let players = []
 let turnOrder = [0, 1, 2, 3] //track overall turn order
 let curAuction = {
@@ -24,7 +22,7 @@ let curAuction = {
   curBid: 0,
   curCard: -1,
   turnOrder: [0, 1, 2, 3],
-  didBuy: false
+  didBuy: false,
 }
 let resources = initialState.resources
 let powerplantDeck = initialState.powerplantDeck
@@ -33,7 +31,7 @@ let powerplantMarket = powerplantDeck.slice(0, 8)
 powerplantDeck = powerplantDeck.slice(8, powerplantDeck.length)
 console.log(powerplantDeck)
 // Meat of code goes in here
-io.on('connection', socket => {
+io.on('connection', (socket) => {
   //If first player, enable start button
   socket.on('READY', () => {
     if (numPlayers === 0) {
@@ -41,7 +39,7 @@ io.on('connection', socket => {
     }
 
     //Players press ready to join
-    if ((phase = 'LOBBY')) {
+    if ((gameState.phase = 'LOBBY')) {
       var player = {
         key: socket.id,
         number: numPlayers++,
@@ -50,14 +48,14 @@ io.on('connection', socket => {
         cities: [],
         resources: [0, 0, 0, 0],
         auctionComp: false,
-        resourceComp: false
+        resourceComp: false,
       }
       players.push(player)
       socket.join('GAME')
       console.log(`player ${socket.id} has joined the game`)
       io.to(`${players[players.length - 1].key}`).emit('JOINED', {
         text: `hello player ${numPlayers}`,
-        playerNum: numPlayers
+        playerNum: numPlayers,
       })
       io.in('GAME').emit('PLAYER_UPDATE', { players: players })
     }
@@ -66,32 +64,32 @@ io.on('connection', socket => {
   //when host presses start, init game (draw board, show market and future, show resources, randomize order)
 
   socket.on('START', () => {
-    if (phase === 'LOBBY') {
+    if (gameState.phase === 'LOBBY') {
       //send cities map, markets, send order
       players = shuffle(players)
       //need to remove cards and shuffle in tier 3 card
       let temp = powerplantDeck[2]
       powerplantDeck = shuffle(powerplantDeck)
-      powerplantDeck.unshift(temp)
-      powerplantDeck.push({
+      powerplantDeck.push(temp)
+      powerplantDeck.unshift({
         number: 999,
         type: [1, 1, 1, 1],
         cost: 999,
-        power: 0
+        power: 0,
       })
+      gameState.phase = 'AUCTION'
       io.in('GAME').emit('GAME_STATE_UPDATE', {
         market: powerplantMarket,
         players: players,
-        resources: resources.map(r => ({ market: r.market, count: r.count })),
-        cities: cities
+        resources: resources.map((r) => ({ market: r.market, count: r.count })),
+        cities: cities,
+        gameState: gameState,
       })
-      phase = 'AUCTION'
-      io.in('GAME').emit('AUCTION_PHASE')
       console.log('started')
     }
   })
 
-  socket.on('AUCTION_BID', data => {
+  socket.on('AUCTION_BID', (data) => {
     //verify auction bid
     console.log('received auction')
     //confirm auction is ongoing
@@ -114,11 +112,11 @@ io.on('connection', socket => {
           auctionQ.push(auctionQ.shift())
           curAuction = {
             active: true,
-            curPlayer: players.find(e => e.key === socket.id),
+            curPlayer: players.findIndex((e) => e.key === socket.id),
             curBid: powerplantMarket[data.card].number,
             card: powerplantMarket[data.card],
             turnOrder: auctionQ,
-            didBuy: true
+            didBuy: true,
           }
           powerplantMarket.splice(data.card, 1)
         }
@@ -135,7 +133,7 @@ io.on('connection', socket => {
       } else {
         //console.log(data)
         curAuction.curBid = data.bid
-        curAuction.curPlayer = players.find(e => e.key === socket.id)
+        curAuction.curPlayer = players.findIndex((e) => e.key === socket.id)
         curAuction.turnOrder.push(curAuction.turnOrder.shift())
       }
       //only one person left = winner
@@ -164,9 +162,9 @@ io.on('connection', socket => {
           console.log('hello')
           powerplantMarket.pop()
           powerplantMarket.shift()
-          step = 3
+          gameState.step = 3
         }
-        phase = 'RESOURCES'
+        gameState.phase = 'RESOURCES'
       }
       console.log(curAuction.turnOrder)
 
@@ -174,13 +172,16 @@ io.on('connection', socket => {
       io.in('GAME').emit('AUCTION_UPDATE', curAuction)
       io.in('GAME').emit('GAME_STATE_UPDATE', {
         market: powerplantMarket,
-        players: players
+        players: players,
+        resources: resources.map((r) => ({ market: r.market, count: r.count })),
+        cities: cities,
+        gameState: gameState,
       })
     }
   })
 
-  socket.on('REMOVAL', data => {
-    x = players.find(p => p.key === socket.id)
+  socket.on('REMOVAL', (data) => {
+    x = players.find((p) => p.key === socket.id)
     for (let i = 0; i < x.resources.length; i++) {
       x.resources[i] -= data.resources[i]
       resources[i] += data.resources[i]
@@ -189,12 +190,12 @@ io.on('connection', socket => {
     io.in('GAME').emit('GAME_STATE_UPDATE', {
       market: powerplantMarket,
       players: players,
-      resourceMarket: resources.market
+      resourceMarket: resources.market,
     })
   })
 
   //need to reverse order
-  socket.on('BUY_RESOURCE', data => {
+  socket.on('BUY_RESOURCE', (data) => {
     if (socket.id === players[turnOrder[3]].key) {
       for (let i = 0; i < resources.length; i++) {
         resources[i].market -= data.resources[i]
@@ -205,17 +206,17 @@ io.on('connection', socket => {
       io.in('GAME').emit('GAME_STATE_UPDATE', {
         players: players,
         market: powerplantMarket,
-        resourceMarket: resources.market
+        resourceMarket: resources.market,
       })
       turnOrder.unshift(turnOrder.pop())
       if (turnOrder[0] === 0) {
-        phase = 'CITIES'
+        gameState.phase = 'CITIES'
       }
     }
   })
 
   //data contains cities[] and money
-  socket.on('CITIES', data => {
+  socket.on('CITIES', (data) => {
     if (socket.id === players[turnOrder[0]].key) {
       x = players[turnOrder[0]]
       x.cities = x.cities.concat(data.cities)
@@ -231,14 +232,14 @@ io.on('connection', socket => {
       }
       turnOrder.push(turnOrder.shift())
       if (turnOrder[0] === 0) {
-        phase = 'BUREACRACY'
-        if (step === 1) {
+        gameState.phase = 'BUREACRACY'
+        if (gameState.step === 1) {
           if (
-            players.find(p => {
+            players.find((p) => {
               p.cities.length >= 7
             })
           ) {
-            step = 2
+            gameState.step = 2
             powerplantMarket.shift()
             updateMarket(powerplantMarket, powerplantDeck)
           }
@@ -247,9 +248,9 @@ io.on('connection', socket => {
     }
   })
 
-  socket.on('BUREACRACY', data => {
+  socket.on('BUREACRACY', (data) => {
     if (socket.id === players[turnOrder[0]].key) {
-      let x = players.find(p => p.key === socket.id)
+      let x = players.find((p) => p.key === socket.id)
       for (var i = 0; i < data.resources.length; i++) {
         x.resources[i] -= data.resources[i]
         resources[i] += data.resources[i]
@@ -257,7 +258,7 @@ io.on('connection', socket => {
       x.powered = data.powered
       x.money += initialState.payout[x.powered]
       if (ready++ === players.length) {
-        if (players.find(p => p.cities.length > 17)) {
+        if (players.find((p) => p.cities.length > 17)) {
           let max = 0
           let winner = 0
           for (let i = 0; i < players.length; i++) {
@@ -278,19 +279,19 @@ io.on('connection', socket => {
         }
         //replenish resources
         for (r in resources) {
-          if (r.count < refill[step]) {
+          if (r.count < refill[gameState.step]) {
             r.market += r.count
             r.count = 0
           } else {
-            r.market += refill[step]
-            r.count -= refill[step]
+            r.market += refill[gameState.step]
+            r.count -= refill[gameState.step]
           }
         }
         //reset market: remove highest and put at the bottom of deck AKA/
         powerplantDeck.unshift(powerplantMarket.pop())
         updateMarket(powerplantMarket, powerplantDeck)
         players.sort((a, b) => (a.cities < b.cities ? 1 : -1))
-        turnCount++
+        gameState.turnCount++
         ready = 0
         //reset auction
         curAuction = {
@@ -299,13 +300,13 @@ io.on('connection', socket => {
           curBid: 0,
           curCard: -1,
           turnOrder: [0, 1, 2, 3],
-          didBuy: false
+          didBuy: false,
         }
         io.in('GAME').emit('GAME_STATE_UPDATE', {
           players: players,
           powerplantMarket: powerplantMarket,
           resourceMarket: resources.market,
-          turn: turnCount
+          turn: gameState.turnCount,
         })
       }
     }

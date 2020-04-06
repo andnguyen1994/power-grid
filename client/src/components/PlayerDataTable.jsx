@@ -11,7 +11,7 @@ import ListItem from '@material-ui/core/ListItem'
 import PowerplantCard from './PowerplantCard'
 
 function PlayerTableData({ players }) {
-  console.log(players)
+  //console.log(players)
   return (
     <TableContainer component={Paper}>
       <Table aria-label="simple table">
@@ -25,7 +25,7 @@ function PlayerTableData({ players }) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {players.map(p => (
+          {players.map((p) => (
             <TableRow key={p.key}>
               <TableCell component="th" scope="row">
                 {p.number}
@@ -33,7 +33,7 @@ function PlayerTableData({ players }) {
               <TableCell align="right">{p.money}</TableCell>
               <TableCell align="right">
                 <List>
-                  {p.powerplants.map(powerplant => {
+                  {p.powerplants.map((powerplant) => {
                     return (
                       <ListItem>
                         <PowerplantCard powerplant={powerplant} />

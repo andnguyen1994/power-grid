@@ -1,8 +1,9 @@
 import React from 'react'
 import styled from 'styled-components'
+import Card from '@material-ui/core/Card'
 import { Coal, Oil, Garbage, Uranium } from './Icons'
 
-const Card = styled.div`
+const CardStyled = styled(Card)`
   display: flex;
   height: 100%;
   width: 100%;
@@ -10,7 +11,7 @@ const Card = styled.div`
   grid-template-areas: 'number type cost power';
   justify-items: stretch;
   align-items: center;
-  border: 2px solid black;
+  border: 1px solid #cccccc;
 `
 
 const NumberDisplay = styled.div`
@@ -36,7 +37,7 @@ const TypeDisplay = styled.div`
 
 const TypeContainer = styled.div`
   display: inline-block;
-  grid-area: ${props => props.type};
+  grid-area: ${(props) => props.type};
   min-width: 0;
   min-height: 0;
 `
@@ -54,7 +55,7 @@ const PowerDisplay = styled.div`
 const PowerplantCard = ({ powerplant }) => {
   const { number, type, cost, power } = powerplant
   return (
-    <Card>
+    <CardStyled>
       <NumberDisplay>{number}</NumberDisplay>
       <TypeDisplay>
         <TypeContainer type="coal">
@@ -72,7 +73,7 @@ const PowerplantCard = ({ powerplant }) => {
       </TypeDisplay>
       <CostDisplay>{cost}</CostDisplay>
       <PowerDisplay>{power}</PowerDisplay>
-    </Card>
+    </CardStyled>
   )
 }
 

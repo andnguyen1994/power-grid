@@ -1,17 +1,21 @@
 import React from 'react'
 import styled from 'styled-components'
 import { Coal, Oil, Garbage, Uranium } from './Icons'
+import Paper from '@material-ui/core/Paper'
 import socketIOClient from 'socket.io-client'
 
-const ResourceMarketContainer = styled.div`
+const ResourceMarketContainer = styled(Paper)`
   display: grid;
-  height: 55%;
+  height: 60%;
   grid-template-columns: repeat(4, 3fr) 1fr;
-  grid-template-areas: 'coal oil garbage uranium value';
+  grid-template-rows: 8fr 1fr;
+  grid-template-areas:
+    'coal oil garbage uranium value'
+    'u3 u2 u1 u0 u4';
 `
 
 const ResourceBlockContainer = styled.div`
-  grid-area: ${props => props.type};
+  grid-area: ${(props) => props.type};
   max-height: 100%;
   display: flex;
   min-height: 0;
@@ -34,14 +38,16 @@ const IconContainer = styled.div`
 `
 
 const UraniumExtraContainer = styled.div`
-  display: flex;
+  grid-area: ${(props) => props.loc};
+  height: 100%;
+  width: 100%;
+  border: 1px solid black;
 `
 
 const getResourceGroup = (Type, resource) => {
   let outer = []
   let total = resource.market + resource.count
   let n = parseInt(total / 8)
-  console.log(n)
   for (let i = 0; i < 8; i++) {
     let inner = []
     for (let j = i * n + 1; j <= i * n + n; j++) {
@@ -57,12 +63,13 @@ const getResourceGroup = (Type, resource) => {
   return outer.reverse()
 }
 
-const ResourceMarket = props => {
+const ResourceMarket = (props) => {
   let [coal, oil, garbage, uranium] = props.resources
   let x = [1, 2, 3, 4, 5, 6, 7, 8]
+  let uraniumCosts = [10, 12, 14, 16]
 
   return (
-    <ResourceMarketContainer>
+    <ResourceMarketContainer variant="outlined">
       <ResourceBlockContainer type="coal">
         {getResourceGroup(Coal, coal)}
       </ResourceBlockContainer>
@@ -76,10 +83,20 @@ const ResourceMarket = props => {
         {getResourceGroup(Uranium, uranium)}
       </ResourceBlockContainer>
       <ResourceBlockContainer type="value">
-        {x.map(i => (
+        {x.map((i) => (
           <ResourceGroupContainer>{i}</ResourceGroupContainer>
         ))}
       </ResourceBlockContainer>
+      {uraniumCosts.map((val, index) => {
+        return (
+          <UraniumExtraContainer loc={`u${index}`}>
+            {val}
+            <IconContainer>
+              <Uranium fill={uranium.market >= 9 + index ? 1 : 0} />
+            </IconContainer>
+          </UraniumExtraContainer>
+        )
+      })}
     </ResourceMarketContainer>
   )
 }

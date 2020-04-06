@@ -30,6 +30,9 @@ const MainBoardContainer = styled.div`
 
 const PlayerAreaContainer = styled.div`
   grid-area: hand;
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  grid-template-areas: 'handarea auction';
 `
 
 const MarketAreaContainer = styled.div`
@@ -37,7 +40,11 @@ const MarketAreaContainer = styled.div`
 `
 
 const GameStateContainer = () => {
-  const [gameState, setGameState] = useState({ step: 0, phase: '', turn: 0 })
+  const [gameState, setGameState] = useState({
+    step: 0,
+    phase: 'LOBBY',
+    turn: 0,
+  })
   const [number, setNumber] = useState(-1)
   const [players, updatePlayers] = useState([])
   const [market, updateMarket] = useState([])
@@ -45,32 +52,38 @@ const GameStateContainer = () => {
     { market: 0, count: 0 },
     { market: 0, count: 0 },
     { market: 0, count: 0 },
-    { market: 0, count: 0 }
+    { market: 0, count: 0 },
   ])
-  const [auction, updateAuction] = useState({ active: false })
+  const [auction, updateAuction] = useState({
+    active: false,
+    curPlayer: '',
+    curBid: 0,
+    card: {},
+    turnOrder: [0, 1, 2, 3],
+  })
 
   useEffect(() => {
     if (number === -1) {
       socket.emit('READY')
       socket.on(
         'JOINED',
-        data => {
+        (data) => {
           setNumber(data.playerNum)
         },
         [number]
       )
-      socket.on('PLAYER_UPDATE', data => {
+      socket.on('PLAYER_UPDATE', (data) => {
         updatePlayers(data.players)
       })
-      socket.on('GAME_STATE_UPDATE', data => {
+      socket.on('GAME_STATE_UPDATE', (data) => {
         updateMarket(data.market)
         updatePlayers(data.players)
         updateResources(data.resources)
+        setGameState(data.gameState)
       })
-      socket.on('AUCTION_UPDATE', data => {
-        console.log('auction update')
+      socket.on('AUCTION_UPDATE', (data) => {
+        //console.log('auction update', data)
         updateAuction(data)
-        console.log(data)
       })
     }
   })
@@ -81,7 +94,18 @@ const GameStateContainer = () => {
         <PlayerDataTable players={players} />
       </MainBoardContainer>
       <PlayerAreaContainer>
-        <StartButton socket={socket} />
+        {gameState.phase === 'LOBBY' && <StartButton socket={socket} />}
+        {gameState.phase === 'AUCTION' && (
+          <Auction
+            active={auction.active}
+            socket={socket}
+            curPlayer={auction.curPlayer}
+            curBid={auction.curBid}
+            card={auction.card}
+            turnOrder={auction.turnOrder}
+            players={players}
+          />
+        )}
       </PlayerAreaContainer>
       <MarketAreaContainer>
         <Market marketData={market} socket={socket} />
